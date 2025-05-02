@@ -1,4 +1,4 @@
-import math  # 导入数学库，用于数学运算
+import math  # 导入数学库，用于数学运算，math和cmath都可用
 
 # 定义一个类 array，用于模拟 NumPy 的多维数组功能
 class array:
