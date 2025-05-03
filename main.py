@@ -8,64 +8,7 @@ import utime
 import gc
 import openmv_numpy as np1
 from kalman_filter import Tracker_Manager
-
-"""坐标变换相关函数"""
-def solve_linear_system(A, B):#求解线性方程组Ax=B
-    n = len(A)
-    augmented = [row[:] + [B[i]] for i, row in enumerate(A)]
-    # 高斯消元
-    for col in range(n):
-        # 寻找主元行
-        max_row = col
-        for row in range(col, n):
-            if abs(augmented[row][col]) > abs(augmented[max_row][col]):
-                max_row = row
-        # 交换行
-        augmented[col], augmented[max_row] = augmented[max_row], augmented[col]
-        # 归一化主元行
-        pivot = augmented[col][col]
-        if pivot == 0:
-            raise ValueError("矩阵不可逆，请检查输入点对是否有效")
-        for j in range(col, n + 1):
-            augmented[col][j] /= pivot
-        # 消元下方行
-        for row in range(col + 1, n):
-            factor = augmented[row][col]
-            for j in range(col, n + 1):
-                augmented[row][j] -= factor * augmented[col][j]
-
-    # 回代
-    x = [0] * n
-    for row in reversed(range(n)):
-        x[row] = augmented[row][n]
-        for col in range(row + 1, n):
-            x[row] -= augmented[row][col] * x[col]
-    return x
-
-def compute_homography(src_points, dst_points):#求变换矩阵
-    A = []
-    B = []
-    for (src_x, src_y), (dst_x, dst_y) in zip(src_points, dst_points):
-        A.append([src_x, src_y, 1, 0, 0, 0, -src_x*dst_x, -src_y*dst_x])
-        B.append(dst_x)
-        A.append([0, 0, 0, src_x, src_y, 1, -src_x*dst_y, -src_y*dst_y])
-        B.append(dst_y)
-
-    params = solve_linear_system(A, B)
-    a, b, c, d, e, f, g, h = params
-    return [
-        [a, b, c],
-        [d, e, f],
-        [g, h, 1]
-    ]
-
-def apply_homography(H, x, y):#求解变换后的坐标
-    denominator = H[2][0]*x + H[2][1]*y + 1
-    x_transformed = (H[0][0]*x + H[0][1]*y + H[0][2]) / denominator
-    y_transformed = (H[1][0]*x + H[1][1]*y + H[1][2]) / denominator
-    return (x_transformed, y_transformed)
-
-
+from perspective_transformation import PerspectiveTransformation
 """
 其他函数
 """
@@ -141,7 +84,7 @@ lcd.clear(lcd.WHITE)
 #时钟对象初始化
 clock = time.clock()                # 创建一个时钟对象来跟踪FPS。
 # 透视矩阵初始化，计算透视变换矩阵
-H = compute_homography(img_swimmingpool_coord, real_swimmingpool_coord)
+H = PerspectiveTransformation.compute_homography(img_swimmingpool_coord, real_swimmingpool_coord)
 #卡尔曼滤波器初始化
 A = np1.array([[1, 0, 1, 0], [0, 1, 0, 1], [0, 0, 1, 0], [0, 0, 0, 1]])#A: 状态转移矩阵
 H_k = np1.eye(4)#H: 观测矩阵
@@ -187,7 +130,7 @@ while True:
             swimmer_center = get_swimmer_center(swimmer_coord)
             print("Swimmer center:", swimmer_center)
             Manager.match(int(swimmer_center[0][0]),int(swimmer_center[0][1]),A,H_k,Q,R,20,20)
-            transformed = apply_homography(H, *swimmer_center[0])
+            transformed = PerspectiveTransformation.apply_homography(H, *swimmer_center[0])
             print("Transformed coordinates:", transformed)
         for object in max_objects:#用于显示每个物体的概率和类别
             rect = object.rect()
