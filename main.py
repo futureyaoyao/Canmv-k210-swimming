@@ -66,7 +66,7 @@ predicted_swimmer_coord=[]
 rectangle_width=0
 rectangle_height=0
 #摄像头初始化
-sensor_window = (320, 256)
+sensor_window = (224, 224)
 sensor_hmirror=False
 sensor_vflip=False
 sensor.reset()
