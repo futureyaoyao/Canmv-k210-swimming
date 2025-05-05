@@ -93,7 +93,9 @@ R = np1.eye(4)# R: 测量噪声协方差矩阵
 B = None
 Manager = Tracker_Manager()
 #蓝色的LAB阈值(0, 100, -25, 18, -44, -11)
+
 anchors = [1.78, 1.31, 3.88, 2.34, 2.69, 1.16, 1.22, 0.66, 0.56, 0.59]
+
 task=kpu.load("/sd/model-191671.kmodel")  # 模型保存在SD卡中，从SD卡中直接加载模型
 #kpu.load_kmodel(0x300000,278440)  # 我们需要把kmodel模型烧入到0x300000的位置，278440为模型的大小，我们可以通过查看文件属性可以得到；
 kpu.init_yolo2(task,0.5,0.3,len(anchors)//2,anchors)
