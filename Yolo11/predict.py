@@ -12,9 +12,9 @@ import torch  # PyTorch库，用于深度学习模型的加载和推理
 # 创建命令行参数解析器
 parser = argparse.ArgumentParser()
 # 添加检测参数
-parser.add_argument('--weights', default=r"runs/detect/train/weights/best.pt", type=str, help='weights path')  # 模型权重路径
+parser.add_argument('--weights', default=r"runs/detect/train3/weights/best.pt", type=str, help='weights path')  # 模型权重路径
 parser.add_argument('--source', default=r"videos/input2.mp4", type=str, help='img or video(.mp4)path')  # 输入文件路径
-parser.add_argument('--save', default=r"./save", type=str, help='save img or video path')  # 输出保存路径
+parser.add_argument('--save', default=r"save", type=str, help='save img or video path')  # 输出保存路径
 parser.add_argument('--vis', default=True, action='store_true', help='visualize image')  # 是否可视化检测结果
 parser.add_argument('--conf_thre', type=float, default=0.2, help='conf_thre')  # 置信度阈值
 parser.add_argument('--iou_thre', type=float, default=0.6, help='iou_thre')  # IOU阈值
