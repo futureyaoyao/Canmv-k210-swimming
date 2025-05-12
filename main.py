@@ -59,7 +59,7 @@ def get_relative_position(swimmingpool_coords, swimmer_center):
 start_label = 0
 fps=0
 labels = ['swimmer']
-img_swimmingpool_coord=[[50,10],[180,10],[220,200],[20,200]]
+img_swimmingpool_coord=[[40,60],[180,60],[220,200],[20,200]]
 real_swimmingpool_coord=[[0,0],[0,100],[200,100],[0,200]]
 swimmer_coord=[]
 predicted_swimmer_coord=[]
