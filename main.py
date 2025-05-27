@@ -60,7 +60,7 @@ start_label = 0
 fps=0
 labels = ['swimmer']
 img_swimmingpool_coord=[[40,60],[180,60],[220,200],[20,200]]
-real_swimmingpool_coord=[[0,0],[0,100],[200,100],[0,200]]
+real_swimmingpool_coord=[[0,0],[100,0],[100,200],[0,200]]
 swimmer_coord=[]
 predicted_swimmer_coord=[]
 rectangle_width=0
@@ -92,13 +92,20 @@ Q = np1.eye(4, value=0.1)#  # Q: 过程噪声协方差矩阵
 R = np1.eye(4)# R: 测量噪声协方差矩阵
 B = None
 Manager = Tracker_Manager()
+#视频帧数
+frame_count = 0
+frame_count_signal = False
+#检测到的目标帧数
+detected_frame_count = 0
+#预测的目标帧数
+predicted_frame_count = 0
 #蓝色的LAB阈值(0, 100, -25, 18, -44, -11)
 
 anchors = [1.78, 1.31, 3.88, 2.34, 2.69, 1.16, 1.22, 0.66, 0.56, 0.59]
 
 task=kpu.load("/sd/model-191671.kmodel")  # 模型保存在SD卡中，从SD卡中直接加载模型
 #kpu.load_kmodel(0x300000,278440)  # 我们需要把kmodel模型烧入到0x300000的位置，278440为模型的大小，我们可以通过查看文件属性可以得到；
-kpu.init_yolo2(task,0.5,0.3,len(anchors)//2,anchors)
+kpu.init_yolo2(task,0.4,0.3,len(anchors)//2,anchors)
 """
 kpu_net: kpu 网络对象, 即加载的模型对象, KPU.load()的返回值
 threshold: 概率阈值， 只有是这个物体的概率大于这个值才会输出结果， 取值范围：[0, 1]
@@ -125,6 +132,8 @@ while True:
     if objects:
         max_objects = get_max_value_objects(objects)
         swimmer_coords = get_objects_coordinate(max_objects)
+        detected_frame_count += 1
+        frame_count_signal = True
         if swimmer_coords:
             swimmer_coord = swimmer_coords
         if swimmer_coord:
@@ -140,6 +149,7 @@ while True:
             rectangle_width = rect[2]
             img.draw_rectangle(rect, color=(255, 0, 0))
             img.draw_string(rect[0], rect[1], "%s:%.2f" % (labels[object.classid()], object.value()), scale=2, color=(255, 0, 0))
+
     else:
         predicted_swimmer_counter=0
         img.draw_string(112, 112, "none", scale=2, color=(255, 0, 0))
@@ -152,7 +162,14 @@ while True:
                 x, y = trail[len(trail)-1][0]-rectangle_width*0.5, trail[len(trail)-1][1]-rectangle_height*0.5
                 img.draw_rectangle(int(x), int(y), rectangle_width,rectangle_height, color=(0, 255, 0))
                 img.draw_string(int(x), int(y), "predict_trail", scale=2, color=(0, 255, 0))
+                predicted_frame_count += 1
     print("Trails:", trails_pre)
+    if frame_count_signal:
+        frame_count += 1
+    print("Frame count:", frame_count)
+    print("Detected frame count:", detected_frame_count)
+    print("Predicted frame count:", predicted_frame_count)
+    #img.draw_string(0,0,"fps:%s"%(fps),scale=2,color=(0,255,0))
     lcd.display(img)
     fps = clock.fps()  # 获取FPS
     gc.collect()      # 内存回收机制
